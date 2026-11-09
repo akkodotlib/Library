@@ -152,7 +152,6 @@
 
 ### card shape and hover
 ```css
-        /* Book cards */
         .book-card {
             position: relative;
             display: flex;
@@ -286,3 +285,169 @@
                         </div>
 ```
 **What this does:** btn-dark gives the Pay button its dark style. btn-outline-secondary styles the Wishlist button. d-none hides the owned controls until purchase.
+
+# part 4 - the javascript
+
+JavaScript makes Neo Library interactive. It lets us search, favorite books, move books to the wishlist, simulate purchases, save choices and open the demo reader.
+
+### search and filter books
+```javascript
+        document.getElementById("searchBook").addEventListener("input", searchBooks);
+        document.getElementById("categoryFilter").addEventListener("change", searchBooks);
+
+        function searchBooks() {
+            const search = document.getElementById("searchBook").value.trim().toLowerCase();
+            const category = document.getElementById("categoryFilter").value;
+            let visibleCount = 0;
+
+            document.querySelectorAll(".book-item").forEach(book => {
+                const title = book.querySelector(".card-title").textContent.toLowerCase();
+                const author = book.querySelector(".book-author").textContent.toLowerCase();
+                const bookCategory = book.querySelector(".book-category").textContent.toLowerCase();
+
+                const matchesSearch = (title + " " + author + " " + bookCategory).includes(search);
+                const matchesCategory = category === "all" || bookCategory.includes(category);
+                const match = matchesSearch && matchesCategory;
+
+                book.classList.toggle("d-none", !match);
+                if (match) visibleCount++;
+            });
+
+            document.getElementById("noResults").classList.toggle("d-none", visibleCount > 0);
+        }
+```
+**What this does:** When a user types or changes the category, the function compares the search with book titles, authors and categories, then hides non-matches.
+
+**What this does:** Clicking the star adds or removes the active CSS class, updates accessibility information and saves the result.
+
+### moving books into the wishlist
+```javascript
+        function toggleWishlist(button) {
+            const book = button.closest(".book-item");
+            const wishlist = document.getElementById("wishlistList");
+            const available = document.getElementById("availableList");
+
+            if (book.parentElement.id === "availableList") {
+                wishlist.appendChild(book);
+                button.textContent = "Remove from Wishlist";
+            } else {
+                available.appendChild(book);
+                button.textContent = "Add to Wishlist";
+            }
+
+            updateEmptyMessages();
+            searchBooks();
+            saveBooks();
+        }
+```
+**What this does:** The function moves the chosen book card between the Available to Buy and Wishlist sections.
+
+### simulated purchase
+```javascript
+        function buyBook(button) {
+            const book = button.closest(".book-item");
+            const title = book.querySelector(".card-title").textContent;
+            const confirmed = confirm("Demo purchase: Add " + title + " to Owned eBooks? No real money will be charged.");
+
+            if (confirmed) {
+                document.getElementById("ownedList").appendChild(book);
+                unlockBook(book);
+                updateEmptyMessages();
+                searchBooks();
+                saveBooks();
+            }
+        }
+```
+**What this does:** A confirmation box appears. Confirming moves the book to Owned eBooks. This is not a real payment.
+
+### unlock a book
+```javascript
+        function unlockBook(book) {
+            book.querySelector(".locked-image").classList.remove("locked-image");
+            book.querySelector(".lock-message").classList.add("d-none");
+            book.querySelector(".buy-actions").classList.add("d-none");
+            book.querySelector(".owned-actions").classList.remove("d-none");
+        }
+```
+**What this does:** The locked label and payment controls are hidden, and the Read Book controls become visible.
+
+### saving book state
+```javascript
+        function saveBooks() {
+            const savedBooks = {};
+
+            document.querySelectorAll(".book-item").forEach(book => {
+                savedBooks[book.dataset.book] = {
+                    section: book.parentElement.id,
+                    favorite: book.querySelector(".star-button").classList.contains("active")
+                };
+            });
+
+            localStorage.setItem("neoLibraryBooks", JSON.stringify(savedBooks));
+        }
+```
+**What this does:** The browser stores each book's section and favorite star using localStorage.
+
+### restore book state
+```javascript
+        function loadBooks() {
+            const savedBooks = JSON.parse(localStorage.getItem("neoLibraryBooks")) || {};
+
+            document.querySelectorAll(".book-item").forEach(book => {
+                const saved = savedBooks[book.dataset.book];
+                if (!saved) return;
+
+                if (saved.section === "ownedList" || saved.section === "wishlistList" || saved.section === "availableList") {
+                    document.getElementById(saved.section).appendChild(book);
+                    if (saved.section === "ownedList" && book.querySelector(".locked-image")) {
+                        unlockBook(book);
+                    }
+                    if (saved.section === "wishlistList") {
+                        book.querySelector(".wishlist-button").textContent = "Remove from Wishlist";
+                    }
+                }
+
+                if (saved.favorite) {
+                    const star = book.querySelector(".star-button");
+                    star.classList.add("active");
+                    star.setAttribute("aria-pressed", "true");
+                }
+            });
+
+            updateEmptyMessages();
+            searchBooks();
+        }
+```
+**What this does:** When the page opens, saved book sections and stars are restored from localStorage.
+
+### open and turn reader pages
+```javascript
+        function readBook(button) {
+            const book = button.closest(".book-item");
+            currentPages = readerPages[book.dataset.book];
+            currentPage = 0;
+            document.getElementById("readerTitle").textContent = book.querySelector(".card-title").textContent;
+            showPage();
+            document.getElementById("readerDialog").showModal();
+        }
+
+        function showPage() {
+            document.getElementById("readerText").textContent = currentPages[currentPage];
+            document.getElementById("pageNumber").textContent = "Page " + (currentPage + 1) + " of " + currentPages.length;
+            document.getElementById("previousPage").disabled = currentPage === 0;
+            document.getElementById("nextPage").disabled = currentPage === currentPages.length - 1;
+        }
+
+        function changePage(amount) {
+            currentPage += amount;
+            showPage();
+        }
+
+        function closeReader() {
+            document.getElementById("readerDialog").close();
+        }
+
+        loadBooks();
+```
+**What this does:** These functions open the dialog, display a short summary, and switch between page 1 and page 2.
+
