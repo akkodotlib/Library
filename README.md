@@ -1,5 +1,4 @@
-Part 01: HTML - Neo Library
-### part1 - the html
+# part 1 - the html
 ```html
 <!DOCTYPE html>
 <html lang="en">
@@ -217,3 +216,73 @@ Part 01: HTML - Neo Library
 ```
 **What this does:** The media rule changes spacing and heading size on narrow screens.
 
+# part 3 - bootstrap
+
+### bootstrap link
+```html
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+```
+**What this does:** This link loads the Bootstrap stylesheet into our web page.
+
+### nav layout
+```html
+    <nav class="navbar navbar-dark">
+        <div class="container d-flex flex-wrap gap-3 justify-content-between">
+            <a class="navbar-brand fw-bold" href="#home">📚 Neo Library</a>
+            <div class="d-flex flex-wrap gap-3">
+                <a class="nav-link-simple" href="#home">Home</a>
+                <a class="nav-link-simple" href="#owned">Owned eBooks</a>
+                <a class="nav-link-simple" href="#wishlist">Wishlist</a>
+                <a class="nav-link-simple" href="#shop">Shop</a>
+            </div>
+        </div>
+    </nav>
+```
+**What this does:** Container keeps content centered. d-flex arranges items in a row, and flex-wrap lets them move to another row on smaller screens.
+
+### search grid
+```html
+        <div class="search-panel mb-4">
+        <div class="row justify-content-center align-items-center g-3">
+            <div class="col-md-7">
+                <div class="search-box">
+                    <span class="search-icon" aria-hidden="true">⌕</span>
+                    <input type="search" class="form-control" id="searchBook"
+                        placeholder="Search by book title or author..." aria-label="Search books">
+                </div>
+            </div>
+            <div class="col-md-4">
+                <select class="form-select" id="categoryFilter" aria-label="Filter books by category">
+                    <option value="all">All Categories</option>
+                    <option value="action">Action</option>
+                    <option value="adventure">Adventure</option>
+                    <option value="fantasy">Fantasy</option>
+                    <option value="magic">Magic</option>
+                </select>
+            </div>
+        </div>
+        </div>
+```
+**What this does:** row creates a grid. col-md-7 and col-md-4 control the widths on medium screens. form-control and form-select style the inputs.
+
+### responsive book column and card
+```html
+            <div class="col-12 col-sm-6 col-lg-4 book-item" data-book="black-clover">
+                <div class="card book-card h-100 shadow-sm">
+                    <button class="star-button" onclick="toggleStar(this)" title="Favorite"
+                        aria-label="Favorite Black Clover" aria-pressed="false">★</button>
+```
+**What this does:** col-12 means one book across a small screen, col-sm-6 means two per row on small-and-up screens, and col-lg-4 means three per row on large screens.
+
+### button styling
+```html
+                        <div class="buy-actions">
+                            <button class="btn btn-dark mb-2" onclick="buyBook(this)">Pay $20 USD</button>
+                            <button class="btn btn-outline-secondary wishlist-button" onclick="toggleWishlist(this)">Add to Wishlist</button>
+                        </div>
+                        <div class="owned-actions d-none">
+                            <p class="text-success fw-bold mb-2">✓ Owned</p>
+                            <button class="btn btn-read" onclick="readBook(this)">Read Book</button>
+                        </div>
+```
+**What this does:** btn-dark gives the Pay button its dark style. btn-outline-secondary styles the Wishlist button. d-none hides the owned controls until purchase.
